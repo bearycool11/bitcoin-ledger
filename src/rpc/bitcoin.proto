@@ -1,21 +1,27 @@
-sysyntax = "proto3";
+syntax = "proto3";
 
 package bitcoin;
 
 option cc_enable_arenas = true;
 
 // ----------- Bitcoin RPC Service -----------
+
 service BitcoinRPC {
+  // Get block data by hash
   rpc GetBlock (GetBlockRequest) returns (GetBlockResponse);
+
+  // Forward RPC call to Binance Smart Chain
   rpc ForwardToBSC (BSCRequest) returns (BSCResponse);
+
+  // Forward RPC call to another Bitcoin gRPC node
   rpc ForwardToBitcoinUpstream (BitcoinPassthroughRequest) returns (BitcoinPassthroughResponse);
 }
 
-// ----------- GetBlock -----------
+// ----------- Messages for GetBlock -----------
 
 message GetBlockRequest {
-  string block_hash = 1;
-  bool verbose = 2;
+  string block_hash = 1;  // Hash of the block to retrieve
+  bool verbose = 2;       // If true, include full transaction hashes
 }
 
 message GetBlockResponse {
@@ -25,27 +31,27 @@ message GetBlockResponse {
   int64 time = 4;
   string previousblockhash = 5;
   string nextblockhash = 6;
-  repeated string tx = 7;
+  repeated string tx = 7; // List of transaction hashes
 }
 
-// ----------- BSC Forwarding -----------
+// ----------- Messages for BSC Forwarding -----------
 
 message BSCRequest {
-  string method = 1;
-  repeated string params = 2;
+  string method = 1;           // JSON-RPC method name
+  repeated string params = 2;  // Parameters for the method
 }
 
 message BSCResponse {
-  string result = 1;
+  string result = 1;           // Raw JSON response string
 }
 
-// ----------- Bitcoin Upstream Forwarding -----------
+// ----------- Messages for Bitcoin Upstream Forwarding -----------
 
 message BitcoinPassthroughRequest {
-  string method = 1;
-  repeated string params = 2;
+  string method = 1;           // JSON-RPC method name (only GetBlock supported currently)
+  repeated string params = 2;  // Parameters for the method
 }
 
 message BitcoinPassthroughResponse {
-  string result = 1;
+  string result = 1;           // Raw JSON response string
 }
