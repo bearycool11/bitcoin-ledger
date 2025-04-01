@@ -62,7 +62,6 @@ public:
         }
     }
 
-    // ----------- GetBlock from local Bitcoin node -----------
     grpc::Status GetBlock(grpc::ServerContext*,
                           const bitcoin::GetBlockRequest* request,
                           bitcoin::GetBlockResponse* response) override
@@ -99,7 +98,6 @@ public:
         return grpc::Status::OK;
     }
 
-    // ----------- ForwardToBSC over JSON-RPC HTTP -----------
     grpc::Status ForwardToBSC(grpc::ServerContext*,
                               const bitcoin::BSCRequest* request,
                               bitcoin::BSCResponse* response) override
@@ -139,7 +137,6 @@ public:
         return grpc::Status::OK;
     }
 
-    // ----------- ForwardToBitcoinUpstream via dRPC gRPC -----------
     grpc::Status ForwardToBitcoinUpstream(grpc::ServerContext*,
         const bitcoin::BitcoinPassthroughRequest* request,
         bitcoin::BitcoinPassthroughResponse* response) override
@@ -194,11 +191,6 @@ void InterruptGRPCServer() {
 
 void StopGRPCServer() {
     if (g_rpc_server) {
-        g_rpc_server->Shutdown();
-        g_rpc_server.reset();
-    }
-}
-
         g_rpc_server->Shutdown();
         g_rpc_server.reset();
     }
