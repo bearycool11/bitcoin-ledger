@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package bitcoin;
+
+option cc_enable_arenas = true;
+
+// ----------- Bitcoin RPC Service -----------
+service BitcoinRPC {
+  rpc GetBlock (GetBlockRequest) returns (GetBlockResponse);
+}
+
+// ----------- Request & Response Messages -----------
+
+message GetBlockRequest {
+  string block_hash = 1;
+  bool verbose = 2; // Optional: defaults to false
+}
+
+message GetBlockResponse {
+  string hash = 1;
+  int32 confirmations = 2;
+  int32 height = 3;
+  int64 time = 4;
+  string previousblockhash = 5;
+  string nextblockhash = 6;
+  repeated string tx = 7;
+}
