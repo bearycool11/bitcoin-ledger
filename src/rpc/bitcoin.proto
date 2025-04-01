@@ -1,4 +1,4 @@
-syntax = "proto3";
+sysyntax = "proto3";
 
 package bitcoin;
 
@@ -7,13 +7,15 @@ option cc_enable_arenas = true;
 // ----------- Bitcoin RPC Service -----------
 service BitcoinRPC {
   rpc GetBlock (GetBlockRequest) returns (GetBlockResponse);
+  rpc ForwardToBSC (BSCRequest) returns (BSCResponse);
+  rpc ForwardToBitcoinUpstream (BitcoinPassthroughRequest) returns (BitcoinPassthroughResponse);
 }
 
-// ----------- Request & Response Messages -----------
+// ----------- GetBlock -----------
 
 message GetBlockRequest {
   string block_hash = 1;
-  bool verbose = 2; // Optional: defaults to false
+  bool verbose = 2;
 }
 
 message GetBlockResponse {
@@ -24,4 +26,26 @@ message GetBlockResponse {
   string previousblockhash = 5;
   string nextblockhash = 6;
   repeated string tx = 7;
+}
+
+// ----------- BSC Forwarding -----------
+
+message BSCRequest {
+  string method = 1;
+  repeated string params = 2;
+}
+
+message BSCResponse {
+  string result = 1;
+}
+
+// ----------- Bitcoin Upstream Forwarding -----------
+
+message BitcoinPassthroughRequest {
+  string method = 1;
+  repeated string params = 2;
+}
+
+message BitcoinPassthroughResponse {
+  string result = 1;
 }
