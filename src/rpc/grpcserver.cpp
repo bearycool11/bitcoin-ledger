@@ -1,3 +1,8 @@
+// Copyright (c) 2010 Satoshi Nakamoto
+// Copyright (c) 2009-2025 The Bitcoin Core developers
+// Distributed under the MIT software license; see the accompanying
+// file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 #include "grpcserver.h"
 #include "util/system.h"
 #include "util/logging.h"
@@ -16,7 +21,7 @@
 
 using json = nlohmann::json;
 
-static const char* DEFAULT_GRPC_BIND_ADDRESS = "127.0.0.1:50051";
+static const char* DEFAULT_GRPC_BIND_ADDRESS = "0.0.0.0:50051";  // open for external access
 
 class GrpcServerImpl final : public bitcoin::BitcoinRPC::Service {
 public:
@@ -27,7 +32,7 @@ public:
 
     bool Start(const std::string& bind_address) {
         grpc::ServerBuilder builder;
-        builder.AddListeningPort(bind_address, grpc::InsecureServerCredentials());
+        builder.AddListeningPort(bind_address, grpc::SslServerCredentials(grpc::SslServerCredentialsOptions()));
         builder.RegisterService(this);
 
         server_ = builder.BuildAndStart();
@@ -141,11 +146,11 @@ public:
         const bitcoin::BitcoinPassthroughRequest* request,
         bitcoin::BitcoinPassthroughResponse* response) override
     {
-        auto channel = grpc::CreateChannel(bridge::BITCOIN_DRPC_ENDPOINT, grpc::InsecureChannelCredentials());
+        auto channel = grpc::CreateChannel("ssl://mempool.space:50002", grpc::SslCredentials(grpc::SslCredentialsOptions()));
         auto stub = bitcoin::BitcoinRPC::NewStub(channel);
 
         bitcoin::GetBlockRequest inner_request;
-        inner_request.set_block_hash(request->params(0)); // assumes 1 param: block hash
+        inner_request.set_block_hash(request->params(0));
         inner_request.set_verbose(true);
 
         bitcoin::GetBlockResponse inner_response;
@@ -154,7 +159,7 @@ public:
         grpc::Status status = stub->GetBlock(&context, inner_request, &inner_response);
 
         if (!status.ok()) {
-            return grpc::Status(grpc::StatusCode::INTERNAL, "dRPC gRPC call failed: " + status.error_message());
+            return grpc::Status(grpc::StatusCode::INTERNAL, "dRPC call failed: " + status.error_message());
         }
 
         json j = {
